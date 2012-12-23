@@ -1,0 +1,9 @@
+Aihe: Kalaha peli
+
+Tehd‰‰n peli, jossa idea on siirt‰‰ kuulia pelilaudalla siten, ett‰ mahdollisimman
+moni p‰‰tyy omaan kulhoon. Peli p‰‰ttyy kun toiselta pelaajalta kuulat loppuvat kesken.
+Voittaja on se, jolla on eniten kuulia kipossaan.
+
+K‰ytt‰j‰t: kaksi pelaajaa
+Toiminnot: pelaajat valitsevat vuorollaan yhden kuudesta kiposta, jonka he pelaavat.
+Esiehto: kipossa on kuulia.

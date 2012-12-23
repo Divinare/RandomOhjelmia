@@ -1,0 +1,301 @@
+
+public class Kalaha {
+
+    private int[] taulu; // jokaisessa kupissa aluksi 6 kuulaa
+    private int pelaaja1;  // pelaajan 1 kuulat
+    private int pelaaja2; // pelaajan 2 kuulat
+    private int vuoro; // vuoro on joko 1 tai 2
+    private int voittaja;
+
+    /**
+     * Alustaa pelin, oletuksena 6 kuulaa per kuppi ja vuoro on pelaajan 1
+     */
+    public Kalaha() {
+        taulu = new int[]{0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6};
+        pelaaja1 = 0;
+        pelaaja2 = 0;
+        vuoro = 1;
+        voittaja = 0;
+    }
+    /**
+     * Laitetaan kuppeihin haluttu määrä kuulia
+     */
+
+    public void alustaKupit(int maara) {
+        for (int i = 1; i <= 12; i++) {
+            taulu[i] = maara;
+        }
+        pelaaja1 = 0;
+        pelaaja2 = 0;
+        voittaja = 0;
+        vuoro = 1;
+    }
+    /**
+     * Pelaaja painaa jotakin kuppia, joka toteuttaa metodit pelaajan1vuoro tai pelaajan2vuoro
+     * 
+     * @param kuppi Kuppi jota painetaan
+     */
+
+    public void pushButton(int kuppi) {
+
+        if (vuoro == 1) {
+            pelaajan1vuoro(kuppi);
+        } else {
+            pelaajan2vuoro(kuppi);
+        }
+    }
+    /**
+     * Tehdään pelaajan 1 kupin painalluksesta seuraavat toimenpiteet
+     * 
+     * @param kuppi Kuppi jota painettiin
+     */
+
+    public void pelaajan1vuoro(int kuppi) {
+        if (taulu[1] == 0 && taulu[2] == 0 && taulu[3] == 0
+                && taulu[4] == 0 && taulu[5] == 0 && taulu[6] == 0) {
+            pelaaja2 = pelaaja2 + taulu[7] + taulu[8]
+                    + taulu[9] + taulu[10] + taulu[11] + taulu[12];
+            selvitaVoittaja();
+        }
+        if (taulu[kuppi] == 0) { // onko kuppi tyhjä
+            return;
+        }
+        if (kuppi >= 7) { // jos painetaan vääriä kuppeja
+            return;
+        }
+        vuoro = 2; // vaihetaan pelaajan vuoroa
+        int maaraYht = taulu[kuppi]; // montako kuulaa siirrellään
+        int maaraK = taulu[kuppi];
+        int kohta = kuppi; // mistä otetaan kuulat
+        taulu[kuppi] = 0; // otetaan kuulat kupista mikä valittiin
+        int kohta1 = 0;
+        if (kuppi == 6) { // 1. erikoistapaus jos painetaan 6. kuppia
+            kohta1 = 1;
+        }
+        if (kohta == 6 && maaraK == 1) { // 2. erikoistapaus jos 6. kupissa on 1 kuula
+            pelaaja1++;
+            vuoro = 1;
+            onkoPeliOhi();
+            return;
+        }
+        if (kohta == 6 && maaraK == 2) { // 3. erikoistapaus jos 6. kupissa on 2 kuulaa
+            pelaaja1++;
+            taulu[7]++;
+            onkoPeliOhi();
+            return;
+        }
+
+        for (int i = 0; i < maaraYht; i++) {
+            kohta++;
+            if (i == maaraYht - 1 && taulu[kohta] == 0 && taulu[7 + (6 - kohta)] != 0
+                    && kohta >= 1 && kohta <= 6) {
+                pelaaja1 = pelaaja1 + taulu[7 + (6 - kohta)];
+                taulu[7 + (6 - kohta)] = 0;
+                vuoro = 1;
+            }
+
+            if (kohta == 6 && maaraK > 1 || kohta1 == 1) {
+                kohta1 = 0; // palautetaan nollaksi
+                if (maaraK == 2) { // jos päästään tasan pelaajan 1 kuppiin
+                    pelaaja1++;
+                    vuoro = 1;
+                    taulu[kohta]++;
+                    onkoPeliOhi();
+                    return;
+                }
+                pelaaja1++;
+                maaraK--;
+                i++; //i kasvaa koska pelaaja1 saa pisteen
+            }
+            maaraK--;
+            taulu[kohta]++;
+            if (kohta == 12) {
+                kohta = 0;
+            }
+        }
+        onkoPeliOhi();
+    }
+    /**
+     * Tehdään pelaajan 2 kupin painalluksesta seuraavat toimenpiteet
+     * 
+     * @param kuppi Kuppi jota painettiin
+     */
+
+    public void pelaajan2vuoro(int kuppi) {
+        if (taulu[7] == 0 && taulu[8] == 0 && taulu[9] == 0
+                && taulu[10] == 0 && taulu[11] == 0 && taulu[12] == 0) {
+            pelaaja1 = pelaaja1 + taulu[1] + taulu[2]
+                    + taulu[3] + taulu[4] + taulu[5] + taulu[6];
+            selvitaVoittaja();
+        }
+
+        if (taulu[kuppi] == 0) { // onko kuppi tyhjä
+            return;
+        }
+        if (kuppi <= 6) { // jos painetaan vääriä kuppeja
+            return;
+        }
+        vuoro = 1; // vaihetaan pelaajan vuoroa
+        int maaraYht = taulu[kuppi]; // montako kuulaa siirrellään
+        int maaraK = taulu[kuppi];
+        int kohta = kuppi; // mistä otetaan kuulat
+        taulu[kuppi] = 0; // otetaan kuulat kupista mikä valittiin
+        int kohta1 = 0;
+        if (kuppi == 12) { // 1. erikoistapaus jos painetaan 12. kuppia
+            kohta1 = 1;
+        }
+        if (kohta == 12 && maaraK == 1) { // 2. erikoistapaus jos 12. kupissa on 1 kuula
+            pelaaja2++;
+            vuoro = 2;
+            onkoPeliOhi();
+            return;
+        }
+        if (kohta == 12 && maaraK == 2) { // 3. erikoistapaus jos 12. kupissa on 2 kuulaa
+            pelaaja2++;
+            taulu[1]++;
+            onkoPeliOhi();
+            return;
+        }
+
+        for (int i = 0; i < maaraYht; i++) {
+            kohta++;
+            if (kohta == 13) {
+                kohta = 1;
+            }
+            if (i == maaraYht - 1 && taulu[kohta] == 0 && taulu[7 + (6 - kohta)] != 0
+                    && kohta >= 7 && kohta <= 12) {
+                pelaaja2 = pelaaja2 + taulu[7 + (6 - kohta)];
+                taulu[7 + (6 - kohta)] = 0;
+                vuoro = 2;
+            }
+
+            if (kohta == 12 && maaraK > 1 || kohta1 == 1) {
+                kohta1 = 0; // palautetaan nollaksi
+                if (maaraK == 2) { // jos päästään tasan pelaajan 2 kuppiin
+                    pelaaja2++;
+                    vuoro = 2;
+                    taulu[kohta]++;
+                    onkoPeliOhi();
+                    return;
+                }
+                pelaaja2++;
+                maaraK--;
+                i++; //i kasvaa koska pelaaja2 saa pisteen
+            }
+            maaraK--;
+            taulu[kohta]++;
+        }
+        onkoPeliOhi();
+    }
+    /**
+     * @return voittaja, joko 0, 1, 2 tai 3
+     */
+
+    public int getVoittaja() {
+        return voittaja;
+    }
+    /**
+     * Metodi tarkistaa onko toisella pelaajista kaikki kupit tyhjiä
+     */
+
+    public void onkoPeliOhi() {
+        if (taulu[1] == 0 && taulu[2] == 0 && taulu[3] == 0
+                && taulu[4] == 0 && taulu[5] == 0 && taulu[6] == 0) { // Jos pelaajan 1 kuulat ovat loppu
+            pelaaja2 = pelaaja2 + taulu[7] + taulu[8]
+                    + taulu[9] + taulu[10] + taulu[11] + taulu[12];
+            for (int i = 7; i <= 12; i++) {
+                taulu[i] = 0;
+            }
+            selvitaVoittaja();
+        }
+        if (taulu[7] == 0 && taulu[8] == 0 && taulu[9] == 0
+                && taulu[10] == 0 && taulu[11] == 0 && taulu[12] == 0) { // Jos pelaajan 2 kuulat ovat loppu
+            pelaaja1 = pelaaja1 + taulu[1] + taulu[2]
+                    + taulu[3] + taulu[4] + taulu[5] + taulu[6];
+            for (int i = 1; i <= 6; i++) {
+                taulu[i] = 0;
+            }
+            selvitaVoittaja();
+        }
+    }
+    /**
+     * Selvitetään kuka voittaa vai tuleeko tasapeli
+     */
+
+    public void selvitaVoittaja() {
+        if (pelaaja1 > pelaaja2) {
+            voittaja = 1;
+        } else if (pelaaja2 > pelaaja1) {
+            voittaja = 2;
+        } else {
+            voittaja = 3; // Tasapeli
+        }
+    }
+    /**
+     * @return pelaajan 1 pisteet
+     */
+
+    public int getPelaaja1() {
+        return pelaaja1;
+    }
+    /**
+     * @return pelaajan 2 pisteet
+     */
+
+    public int getPelaaja2() {
+        return pelaaja2;
+    }
+    /**
+     * @param nro annettu kupin numero
+     * 
+     * @return kupin arvo
+     */
+
+    public int getKuppi(int nro) {
+        return taulu[nro];
+    }
+    /**
+     *  @return vuoro, joko 1 tai 2
+     */
+
+    public int getVuoro() {
+        return vuoro;
+    }
+    /**
+     * @return pelaajan 1 pisteen stringinä
+     */
+
+    public String getPelaaja1String() {
+        String s = Integer.toString(pelaaja1);
+        return s;
+    }
+    /**
+     * @return pelaajan 2 pisteen stringinä
+     */
+    public String getPelaaja2String() {
+        String s = Integer.toString(pelaaja2);
+        return s;
+    }
+    /**
+     * @param nro kupin numero
+     * 
+     * @return kupin arvo stringinä
+     */
+    public String getKuppiString(int nro) {
+        String s = Integer.toString(taulu[nro]);
+        return s;
+    }
+    /**
+     * @param nro kupin numero
+     * @param luku kuulien määrä
+     */
+    public void setKuppi(int nro, int luku) { // metodi ohjelman testaamista varten
+        taulu[nro] = luku;
+    }
+    /**
+     * @param luku miksikä pelaajan vuoro halutaan laittaa, joko 1 tai 2
+     */
+    public void setVuoro(int luku) { // 1 on pelaaja 1, 2 on pelaaja 2
+        vuoro = luku;
+    }
+}

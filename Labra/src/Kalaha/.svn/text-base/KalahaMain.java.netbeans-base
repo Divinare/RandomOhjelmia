@@ -1,0 +1,214 @@
+
+import javax.swing.JOptionPane;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+public class KalahaMain extends JFrame {
+
+    private Kalaha game;
+    private JPanel p1;
+    private JPanel p2;
+    private JPanel p3;
+    private JPanel p4;
+    private JPanel p5;
+    private JTextField pisteet1;
+    private JTextField pisteet2;
+    private JTextField malahaText;
+    private JButton b1;
+    private JButton b2;
+    private JButton b3;
+    private JButton b4;
+    private JButton b5;
+    private JButton b6;
+    private JButton b7;
+    private JButton b8;
+    private JButton b9;
+    private JButton b10;
+    private JButton b11;
+    private JButton b12;
+    private ArrayList<JButton> napit;
+
+    public KalahaMain() {
+
+        gui();
+    }
+    /*
+     * Luodaan graafinen toiminnallisuus sekä paneelit p3, p4 ja p5
+     */        
+    public void gui() {
+
+        game = new Kalaha();
+        
+//        JFrame f = new JFrame("Malaha Game");
+
+        setSize(300, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        luoNapit();
+        luoEkatKaksiPaneelia();
+        p3 = new JPanel(new GridBagLayout());
+        p3.setBackground(Color.PINK);
+        p4 = new JPanel(new GridBagLayout());
+        p4.setBackground(Color.PINK);
+        p5 = new JPanel(new GridBagLayout());
+
+        p5.setBackground(Color.PINK);
+
+        malahaText = new JTextField("Kalaha");
+        malahaText.setEditable(false);
+        p5.add(malahaText);
+        add(p5, BorderLayout.CENTER);
+
+        pisteet1 = new JTextField("  " + game.getPelaaja1());
+        pisteet1.setEditable(false);
+        p3.add(pisteet1);
+        add(p3, BorderLayout.WEST);
+
+        pisteet2 = new JTextField("  " + game.getPelaaja2());
+        pisteet2.setEditable(false);
+        p4.add(pisteet2);
+        add(p4, BorderLayout.EAST);
+
+        pack();
+        setVisible(true);
+    }
+    /*
+     * Luodaan 2 ensimmäistä paneelia p1 ja p2
+     */    
+    private void luoEkatKaksiPaneelia() {
+        p1 = new JPanel(new GridBagLayout());
+        p1.setBackground(Color.LIGHT_GRAY);
+        p2 = new JPanel(new GridBagLayout());
+        p2.setBackground(Color.LIGHT_GRAY);
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(10, 10, 10, 10);
+
+        p1.add(b6, c);
+        c.gridx = 1;
+        c.gridy = 0;
+        p1.add(b5, c);
+        c.gridx = 2;
+        c.gridy = 0;
+        p1.add(b4, c);
+        c.gridx = 3;
+        c.gridy = 0;
+        p1.add(b3, c);
+        c.gridx = 4;
+        c.gridy = 0;
+        p1.add(b2, c);
+        c.gridx = 5;
+        c.gridy = 0;
+        p1.add(b1, c);
+        c.gridx = 6;
+        c.gridy = 0;
+
+        p2.add(b12, c);
+        c.gridx = 1;
+        c.gridy = 0;
+        p2.add(b7, c);
+        c.gridx = 2;
+        c.gridy = 0;
+        p2.add(b8, c);
+        c.gridx = 3;
+        c.gridy = 0;
+        p2.add(b9, c);
+        c.gridx = 4;
+        c.gridy = 0;
+        p2.add(b10, c);
+        c.gridx = 5;
+        c.gridy = 0;
+        p2.add(b11, c);
+        c.gridx = 6;
+        c.gridy = 0;
+
+        add(p1, BorderLayout.NORTH);
+        add(p2, BorderLayout.SOUTH);
+    }
+    /*
+     * Luodaan napit
+     */
+    private void luoNapit() throws HeadlessException {
+        napit = new ArrayList();
+        b1 = new JButton(game.getKuppiString(1));
+        napit.add(b1);
+        b2 = new JButton(game.getKuppiString(2));
+        napit.add(b2);
+        b3 = new JButton(game.getKuppiString(3));
+        napit.add(b3);
+        b4 = new JButton(game.getKuppiString(4));
+        napit.add(b4);
+        b5 = new JButton(game.getKuppiString(5));
+        napit.add(b5);
+        b6 = new JButton(game.getKuppiString(6));
+        napit.add(b6);
+        b7 = new JButton(game.getKuppiString(7));
+        napit.add(b7);
+        b8 = new JButton(game.getKuppiString(8));
+        napit.add(b8);
+        b9 = new JButton(game.getKuppiString(9));
+        napit.add(b9);
+        b10 = new JButton(game.getKuppiString(10));
+        napit.add(b10);
+        b11 = new JButton(game.getKuppiString(11));
+        napit.add(b11);
+        b12 = new JButton(game.getKuppiString(12));
+        napit.add(b12);
+
+
+        int i = 1;
+        for (JButton nappi : napit) {
+            nappi.addActionListener(luoActionListener(this));
+            nappi.setName("" + i);
+            i++;
+        }
+    }
+    /*
+     * Luodaan actionListener joka on sama jokaiselle kupille 1-12
+     */
+    public ActionListener luoActionListener(final KalahaMain main) {
+        return new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent tapahtuma) {
+                JButton tamaNappi = (JButton) tapahtuma.getSource();
+                int nro = Integer.parseInt(tamaNappi.getName());
+                game.pushButton(nro);
+                String teksti = "";
+                for (JButton n : main.napit) {
+                    nro = Integer.parseInt(n.getName());
+                    teksti = game.getKuppiString(nro);
+                    n.setText(teksti);
+                }
+                pisteet1.setText(game.getPelaaja1String());
+                pisteet2.setText(game.getPelaaja2String());
+                main.p1.revalidate();
+                main.p2.revalidate();
+                main.p3.revalidate();
+                main.p4.revalidate();
+                main.p5.revalidate();
+                if (game.getVoittaja() == 1) {
+                    JOptionPane.showMessageDialog(null, "Onnittelut pelaaja1, voitit pelin!");
+                    game.alustaKupit(6);
+                }
+                if (game.getVoittaja() == 2) {
+                    JOptionPane.showMessageDialog(null, "Onnittelut pelaaja2, voitit pelin!");
+                    game.alustaKupit(6);
+                }
+                if (game.getVoittaja() == 3) {
+                    JOptionPane.showMessageDialog(null, "Peli päättyi tasan!");
+                    game.alustaKupit(6);
+                }
+            }
+        };
+    }
+
+    public static void main(String[] args) {
+        KalahaMain peli = new KalahaMain();
+    }
+}
