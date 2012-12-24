@@ -109,7 +109,7 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
         if (luola != null) {
         siirrot.setText("Time : " + luola.getAika() + " Boogies: " + luola.getHirvio().size());
         }
-        System.out.println("wtf");
+        System.out.println("paivitettiin");
         repaint();
     }
 }

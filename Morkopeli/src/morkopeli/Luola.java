@@ -2,9 +2,12 @@ package morkopeli;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import javax.swing.Timer;
 import java.io.IOException;
+import javax.swing.JFileChooser;
+
 
 public class Luola extends Timer implements ActionListener {
 
@@ -16,7 +19,6 @@ public class Luola extends Timer implements ActionListener {
     private String[][] kentta;
     private Tekstinlukija lukija;
     public Paivitettava paivitettava;
-    
 
     public Luola(int morkoM) {
         super(1000, null);
@@ -32,11 +34,12 @@ public class Luola extends Timer implements ActionListener {
         this.leveys = kentta.length;
         this.korkeus = kentta[0].length;
         pelaaja = new Pelaaja(Suunta.ALAS, leveys, korkeus, this);
-
         alkuaika = System.currentTimeMillis();
 
-
+        System.out.println("Kentän alustus");
         alustaKentta(morkoM);
+        System.out.println("ohi");
+
 
         addActionListener(this);
         setInitialDelay(2000);
@@ -44,31 +47,40 @@ public class Luola extends Timer implements ActionListener {
 
     private void lueKentta() {
         try {
-            kentta = lukija.read("level.txt");
+
+            JFileChooser jfc = new JFileChooser();
+//        jfc.setFileFilter(new FileNameExtensionFilter("Tekstitiedostot", "level"));
+            int valinta = jfc.showOpenDialog(null);
+            //Nyt tää siis kysyy et mikä filu avataan. jolloin .txt filu varmasti löytyy .
+
+            //Tässä tavallaan turhaa toistoa, nyt luodaan Fileolio, jolta kysytään polku, jotta voidaan 
+            //luoda uus File olio. mut katotaan jos saadaan tällee toimii
+            File valittu = jfc.getSelectedFile();
+            System.out.println(valittu.getAbsolutePath() + "asdasdasdad");
+            kentta = lukija.read(valittu.getAbsolutePath()/*"level.txt"*/);
+
+
+
         } catch (IOException e) {
             System.out.println("lol");
         }
     }
-
-    // Hirvioita saattaa tulla vähän enempi kuin mitä määrä on (voi jeesus)
     private void alustaKentta(int maara) {
-        int laitetut = 0;
-        while (true) {
-            for (int i = 0; i < korkeus; i++) {
-                for (int j = 0; j < leveys; j++) {
-                    if (kentta[i][j].equals("M")) {
+        for (int i = 0; i < korkeus; i++) {
+            for (int j = 0; j < leveys; j++) {
+                System.out.println(korkeus);
+                if ("M".equalsIgnoreCase(kentta[i][j])) {
+                    int lisatty = 0;
+                    while (lisatty < maara) {
                         Hirvio hirvio = new Hirvio(j, i, this);
                         hirviot.add(hirvio);
-                        laitetut++;
-                    }
-                    if (kentta[i][j].equals("P")) {
-                        pelaaja.setX(j);
-                        pelaaja.setY(i);
+                        lisatty++;
                     }
                 }
-            }
-            if (laitetut >= maara) {
-                return;
+                if (kentta[i][j].equals("P")) {
+                    pelaaja.setX(j);
+                    pelaaja.setY(i);
+                }
             }
         }
     }
@@ -80,7 +92,7 @@ public class Luola extends Timer implements ActionListener {
             return;
         }
         if (!jatkuu) {
-                System.out.println("hävisit hähää!");
+            System.out.println("hävisit hähää!");
             return;
         }
         liiku();
@@ -124,10 +136,11 @@ public class Luola extends Timer implements ActionListener {
     public void havio() {
         jatkuu = false;
     }
+
     public boolean getJatkuu() {
         return jatkuu;
     }
-    
+
     public int getPisteet() {
         return pisteet;
     }

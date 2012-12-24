@@ -1,5 +1,6 @@
 package morkopeli;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Scanner;
@@ -12,10 +13,19 @@ public class Tekstinlukija {
     public String[][] read(String luettava) throws IOException {
         StringBuilder text = new StringBuilder();
         String NL = System.getProperty("line.separator");
-        Scanner scanner = new Scanner(new FileInputStream(luettava));
+        
+        FileInputStream fileolio = new FileInputStream(luettava);
+     //   File f = new File(luettava);
+       
+//        Scanner scanner = new Scanner(new FileInputStream(luettava));
+        Scanner scanner = new Scanner(fileolio);
+        
         try {
-            while (scanner.hasNextLine()) {
-                text.append(scanner.nextLine() + NL);
+            int i = 0;
+            while (scanner.hasNext()) {
+                String luettu = scanner.nextLine();
+                text.append(luettu + NL);
+                System.out.println(scanner.hasNext());
             }
         } finally {
             scanner.close();
