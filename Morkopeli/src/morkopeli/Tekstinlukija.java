@@ -25,7 +25,6 @@ public class Tekstinlukija {
             while (scanner.hasNext()) {
                 String luettu = scanner.nextLine();
                 text.append(luettu + NL);
-                System.out.println(scanner.hasNext());
             }
         } finally {
             scanner.close();

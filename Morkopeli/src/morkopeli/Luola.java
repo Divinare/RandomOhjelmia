@@ -8,7 +8,6 @@ import javax.swing.Timer;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 
-
 public class Luola extends Timer implements ActionListener {
 
     private int leveys, korkeus, morkoM, pisteet;
@@ -19,10 +18,12 @@ public class Luola extends Timer implements ActionListener {
     private String[][] kentta;
     private Tekstinlukija lukija;
     public Paivitettava paivitettava;
+    private Soittaja musiikinSoittaja;
 
-    public Luola(int morkoM) {
+    public Luola(int morkoM, Soittaja musiikinSoittaja) {
         super(1000, null);
         this.morkoM = morkoM;
+        this.musiikinSoittaja = musiikinSoittaja;
         this.pisteet = 0;
         voitit = false;
         this.jatkuu = true;
@@ -35,54 +36,11 @@ public class Luola extends Timer implements ActionListener {
         this.korkeus = kentta[0].length;
         pelaaja = new Pelaaja(Suunta.ALAS, leveys, korkeus, this);
         alkuaika = System.currentTimeMillis();
-
-        System.out.println("Kentän alustus");
         alustaKentta(morkoM);
-        System.out.println("ohi");
-
-
         addActionListener(this);
         setInitialDelay(2000);
-    }
-
-    private void lueKentta() {
-        try {
-
-            JFileChooser jfc = new JFileChooser();
-//        jfc.setFileFilter(new FileNameExtensionFilter("Tekstitiedostot", "level"));
-            int valinta = jfc.showOpenDialog(null);
-            //Nyt tää siis kysyy et mikä filu avataan. jolloin .txt filu varmasti löytyy .
-
-            //Tässä tavallaan turhaa toistoa, nyt luodaan Fileolio, jolta kysytään polku, jotta voidaan 
-            //luoda uus File olio. mut katotaan jos saadaan tällee toimii
-            File valittu = jfc.getSelectedFile();
-            System.out.println(valittu.getAbsolutePath() + "asdasdasdad");
-            kentta = lukija.read(valittu.getAbsolutePath()/*"level.txt"*/);
-
-
-
-        } catch (IOException e) {
-            System.out.println("lol");
-        }
-    }
-    private void alustaKentta(int maara) {
-        for (int i = 0; i < korkeus; i++) {
-            for (int j = 0; j < leveys; j++) {
-                System.out.println(korkeus);
-                if ("M".equalsIgnoreCase(kentta[i][j])) {
-                    int lisatty = 0;
-                    while (lisatty < maara) {
-                        Hirvio hirvio = new Hirvio(j, i, this);
-                        hirviot.add(hirvio);
-                        lisatty++;
-                    }
-                }
-                if (kentta[i][j].equals("P")) {
-                    pelaaja.setX(j);
-                    pelaaja.setY(i);
-                }
-            }
-        }
+        musiikinSoittaja.play("muumimusaa1.wav");
+        
     }
 
     @Override
@@ -116,6 +74,61 @@ public class Luola extends Timer implements ActionListener {
             setDelay(1000 - ((1 + getAika()) * 50));
         }
     }
+
+    private void lueKentta() {
+        try {
+
+            JFileChooser jfc = new JFileChooser();
+//        jfc.setFileFilter(new FileNameExtensionFilter("Tekstitiedostot", "level"));
+            int valinta = jfc.showOpenDialog(null);
+            //Nyt tää siis kysyy et mikä filu avataan. jolloin .txt filu varmasti löytyy .
+
+            //Tässä tavallaan turhaa toistoa, nyt luodaan Fileolio, jolta kysytään polku, jotta voidaan 
+            //luoda uus File olio. mut katotaan jos saadaan tällee toimii
+            File valittu = jfc.getSelectedFile();
+            System.out.println(valittu.getAbsolutePath() + "asdasdasdad");
+            kentta = lukija.read(valittu.getAbsolutePath()/*"level.txt"*/);
+
+
+
+        } catch (IOException e) {
+            System.out.println("lol");
+        }
+    }
+
+    private void alustaKentta(int maara) {
+        for (int i = 0; i < korkeus; i++) {
+            for (int j = 0; j < leveys; j++) {
+                if ("M".equalsIgnoreCase(kentta[i][j])) {
+                    int lisatty = 0;
+                    while (lisatty < maara) {
+                        Hirvio hirvio = new Hirvio(j, i, this);
+                        hirviot.add(hirvio);
+                        lisatty++;
+                    }
+                }
+                if (kentta[i][j].equals("P")) {
+                    pelaaja.setX(j);
+                    pelaaja.setY(i);
+                }
+            }
+        }
+    }
+
+//    private void lueAanet() {
+//        try {
+//            muumimusaa1I = new FileInputStream("src\\Morkopeli\\muumimusaa1.wav");
+//        } catch (Exception e) {
+//            System.out.println("Ei löytynyt InputStreamia");
+//        }
+//        System.out.println("hmm");
+//        try {
+//            muumimusaa1A = new AudioStream(muumimusaa1I);
+//        } catch (Exception e) {
+//            System.out.println("Ei löytynyt AudioStreamia");
+//        }
+//        AudioPlayer.player.start(muumimusaa1A);
+//    }
 
     public void liiku() {
         pelaaja.liiku();

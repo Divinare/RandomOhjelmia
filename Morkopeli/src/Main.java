@@ -6,6 +6,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import morkopeli.Gui;
 import morkopeli.Luola;
+import morkopeli.Soittaja;
 
 public class Main {
 
@@ -13,8 +14,8 @@ public class Main {
     public static void main(String[] args) {
 
    
-
-        Luola peli = new Luola(5);
+        Soittaja musiikinSoittaja = new Soittaja();
+        Luola peli = new Luola(5, musiikinSoittaja);
         Gui kayttoliittyma = new Gui(35, peli);
         kayttoliittyma.run();
         peli.setPaivitettava(kayttoliittyma.getPaivitettava());
