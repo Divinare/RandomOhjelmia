@@ -3,10 +3,10 @@ package morkopeli;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
-import javax.swing.Timer;
 import java.io.IOException;
+import java.util.ArrayList;
 import javax.swing.JFileChooser;
+import javax.swing.Timer;
 
 public class Luola extends Timer implements ActionListener {
 
@@ -19,6 +19,7 @@ public class Luola extends Timer implements ActionListener {
     private Tekstinlukija lukija;
     public Paivitettava paivitettava;
     private Soittaja musiikinSoittaja;
+    
 
     public Luola(int morkoM, Soittaja musiikinSoittaja) {
         super(1000, null);
