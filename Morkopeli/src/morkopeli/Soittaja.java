@@ -12,9 +12,15 @@ public class Soittaja {
     private Clip aani;
     private boolean aanetPaalla = true;
 
+    /*
+     * Olettaa filename -tiedoston olevan samassa pakkauksessa kuin Soittaja (this)
+     * 
+     */
     private void haeMusiikki(String filename) {
-
-        URL url = Soittaja.class.getResource(filename);
+        URL url = morkopeli.Soittaja.class.getResource(filename);
+        if (url == null) {
+            throw new RuntimeException("no audio file");
+        }
         try {
 
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(url);
@@ -24,13 +30,11 @@ public class Soittaja {
             gainControl.setValue(-10.0f);
 
         } catch (Exception e) {
-            System.out.println("Äänitiedoston avaus ei onnistunut.");
-            throw new RuntimeException("Ei ääniä"+ new File(filename).getAbsolutePath());
-//            this.aanetPaalla = false;
+            throw new RuntimeException("Ei ääniä " + url.getPath());
         }
     }
-    
-    public void soitaAani(String filename){
+
+    public void soitaAani(String filename) {
         haeMusiikki(filename);
         soitaAani();
     }
@@ -38,7 +42,7 @@ public class Soittaja {
     public void soitaAani() {
         if (aani == null) {
             haeMusiikki("muumimusaa1.wav");
-        
+
         }
         if (aanetPaalla) {
             try {
@@ -47,12 +51,12 @@ public class Soittaja {
             }
         }
     }
-    
-    public void play(){
+
+    public void play() {
         soitaAani();
     }
-    
-    public void play(String filename){
+
+    public void play(String filename) {
         soitaAani(filename);
     }
 }
