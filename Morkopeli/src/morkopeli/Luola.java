@@ -19,6 +19,7 @@ public class Luola extends Timer implements ActionListener {
     private Tekstinlukija lukija;
     public Paivitettava paivitettava;
     private Soittaja musiikinSoittaja;
+    
 
     public Luola(int morkoM, Soittaja musiikinSoittaja) {
         super(1000, null);

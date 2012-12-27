@@ -1,81 +1,58 @@
 package morkopeli;
 
 import java.io.File;
-import java.io.IOException;
-import javax.sound.sampled.AudioFormat;
+import java.net.URL;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
+import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
-public class Soittaja extends Thread {
+public class Soittaja {
 
-    private final int EXTERNAL_BUFFER_SIZE = 524288; // 128Kb 
+    private Clip aani;
+    private boolean aanetPaalla = true;
 
+    private void haeMusiikki(String filename) {
 
-
-//    public Soittaja(String wavfile) {
-//    }
-
-    public void play(String filename) {
-
-        File soundFile = new File(filename);
-        if (!soundFile.exists()) {
-            System.err.println("Wave file not found: " + filename);
-            return;
-        }
-
-        AudioInputStream audioInputStream = null;
+        URL url = Soittaja.class.getResource(filename);
         try {
-            audioInputStream = AudioSystem.getAudioInputStream(soundFile);
-        } catch (UnsupportedAudioFileException e1) {
-            e1.printStackTrace();
-            return;
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            return;
-        }
 
-        AudioFormat format = audioInputStream.getFormat();
-        SourceDataLine auline = null;
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(url);
+            this.aani = AudioSystem.getClip();
+            this.aani.open(audioInputStream);
+            FloatControl gainControl = (FloatControl) this.aani.getControl(FloatControl.Type.MASTER_GAIN);
+            gainControl.setValue(-10.0f);
 
-        try {
-            auline = (SourceDataLine) AudioSystem.getLine(info);
-            auline.open(format);
-        } catch (LineUnavailableException e) {
-            e.printStackTrace();
-            return;
         } catch (Exception e) {
-            e.printStackTrace();
-            return;
+            System.out.println("Äänitiedoston avaus ei onnistunut.");
+            throw new RuntimeException("Ei ääniä"+ new File(filename).getAbsolutePath());
+//            this.aanetPaalla = false;
         }
-        auline.start();
-        int nBytesRead = 0;
-        byte[] abData = new byte[EXTERNAL_BUFFER_SIZE];
-
-        try {
-            while (nBytesRead != -1) {
-                nBytesRead = audioInputStream.read(abData, 0, abData.length);
-                if (nBytesRead >= 0) {
-                    auline.write(abData, 0, nBytesRead);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        } finally {
-            auline.drain();
-            auline.close();
-        }
-
+    }
+    
+    public void soitaAani(String filename){
+        haeMusiikki(filename);
+        soitaAani();
     }
 
-//    public static void main(String[] args) {
-//        aantenTestaus testi = new aantenTestaus("muumimusaa1.wav");
-//        testi.play("muumimusaa1.wav");
-//    }
+    public void soitaAani() {
+        if (aani == null) {
+            haeMusiikki("muumimusaa1.wav");
+        
+        }
+        if (aanetPaalla) {
+            try {
+                this.aani.start();
+            } catch (Exception e) {
+            }
+        }
+    }
+    
+    public void play(){
+        soitaAani();
+    }
+    
+    public void play(String filename){
+        soitaAani(filename);
+    }
 }
