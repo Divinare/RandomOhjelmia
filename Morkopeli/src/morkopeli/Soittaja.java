@@ -16,8 +16,8 @@ public class Soittaja {
      * Olettaa filename -tiedoston olevan samassa pakkauksessa kuin Soittaja (this)
      * 
      */
-    private void haeMusiikki(String filename) {
-        URL url = morkopeli.Soittaja.class.getResource(filename);
+    private void haeMusiikki(String filename) { // "sounds\\" +
+        URL url = morkopeli.Soittaja.class.getResource(filename + ".wav");
         if (url == null) {
             throw new RuntimeException("no audio file");
         }
@@ -34,16 +34,8 @@ public class Soittaja {
         }
     }
 
-    public void soitaAani(String filename) {
+    public void play(String filename) {
         haeMusiikki(filename);
-        soitaAani();
-    }
-
-    public void soitaAani() {
-        if (aani == null) {
-            haeMusiikki("muumimusaa1.wav");
-
-        }
         if (aanetPaalla) {
             try {
                 this.aani.start();
@@ -51,12 +43,12 @@ public class Soittaja {
             }
         }
     }
-
-    public void play() {
-        soitaAani();
+    
+    public void stop() {
+        this.aani.stop();
     }
-
-    public void play(String filename) {
-        soitaAani(filename);
+    
+    public boolean soitetaankoTallaHetkellaMitaan(){
+        return this.aani.isRunning();
     }
 }

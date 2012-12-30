@@ -9,7 +9,6 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
 
     private Luola luola;
     private int palaP;
-    private boolean peliPaalla;
     private Image morko;
     private Image pelaaja;
     private Image tyhja;
@@ -17,22 +16,28 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
     private Image loppu;
     private Image pause;
     private Image rip;
-    private Image menu;
+    private Image menu1;
+    private Image menu2;
+    private Image menu3;
+    private Image menu4;
+    private Image menu5;
+    private Image morkopeli;
     private JLabel siirrot;
+    private Game game;
 
-    public Piirtoalusta(Luola luola, int palanSivunPituus, JLabel siirrot) {
+    public Piirtoalusta(Luola luola, int palanSivunPituus, JLabel siirrot, Game game) {
         super.setBackground(Color.WHITE);
         this.luola = luola;
         this.palaP = palanSivunPituus;
         this.siirrot = siirrot;
-        this.peliPaalla = true;
+        this.game = game;
         haeKuvat();
     }
 
     private void haeKuvat() {
 
-        URL url = Gui.class.getResource("morko.png");
-        this.morko = Toolkit.getDefaultToolkit().getImage(url);
+        URL url1 = Gui.class.getResource("morko.png");
+        this.morko = Toolkit.getDefaultToolkit().getImage(url1);
         URL url2 = Gui.class.getResource("pelaaja.png");
         this.pelaaja = Toolkit.getDefaultToolkit().getImage(url2);
         URL url3 = Gui.class.getResource("tyhja.png");
@@ -45,8 +50,18 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
         this.pause = Toolkit.getDefaultToolkit().getImage(url6);
         URL url7 = Gui.class.getResource("rip.png");
         this.rip = Toolkit.getDefaultToolkit().getImage(url7);
-        URL url8 = Gui.class.getResource("menu.png");
-        this.menu = Toolkit.getDefaultToolkit().getImage(url8);
+        URL url8 = Gui.class.getResource("menu1.png");
+        this.menu1 = Toolkit.getDefaultToolkit().getImage(url8);
+        URL url9 = Gui.class.getResource("menu2.png");
+        this.menu2 = Toolkit.getDefaultToolkit().getImage(url9);
+        URL url10 = Gui.class.getResource("menu3.png");
+        this.menu3 = Toolkit.getDefaultToolkit().getImage(url10);
+        URL url11 = Gui.class.getResource("menu4.png");
+        this.menu4 = Toolkit.getDefaultToolkit().getImage(url11);
+        URL url12 = Gui.class.getResource("menu5.png");
+        this.menu5 = Toolkit.getDefaultToolkit().getImage(url12);
+        URL url13 = Gui.class.getResource("morkopeli.png");
+        this.morkopeli = Toolkit.getDefaultToolkit().getImage(url13);
     }
 
     @Override
@@ -54,14 +69,6 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
         super.paintComponent(graphics);
 
         piirraKentta(graphics);
-    }
-
-    public void vaihaPeliPaalleTaiPoisPaalta() {
-        if (peliPaalla) {
-            peliPaalla = false;
-        } else {
-            peliPaalla = true;
-        }
     }
 
     private void piirraKentta(Graphics graphics) {
@@ -73,7 +80,7 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
             }
         }
         // Jos halutaan näyttää pelinäkymä
-        if (peliPaalla) {
+        if (game.getOnkoPeliPaalla()) {
             String[][] taulu = luola.getKentta();
             for (int i = 0; i < taulu.length; i++) {
                 for (int j = 0; j < taulu[0].length; j++) {
@@ -99,15 +106,27 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
                 }
             }
         }
-        if (!peliPaalla) {
-            System.out.println("WWWWWWWWWWWWWWWW");
-            graphics.drawImage(menu, 190, 240, 500, 400, this);
-        } // menu, 200, 275, 500, 400, this
+        // Jos ollaan menussa
+        if (!game.getOnkoPeliPaalla()) {
+            if (game.getMenuValinta() == 1) {
+                graphics.drawImage(menu1, 75, 0, 500, 500, this);
+            } else if (game.getMenuValinta() == 2) {
+                graphics.drawImage(menu2, 75, 0, 500, 500, this);
+            } else if (game.getMenuValinta() == 3) {
+                graphics.drawImage(menu3, 75, 0, 500, 500, this);
+            } else if (game.getMenuValinta() == 4) {
+                graphics.drawImage(menu4, 75, 0, 500, 500, this);
+            } else if (game.getMenuValinta() == 5) {
+                graphics.drawImage(menu5, 75, 0, 500, 500, this);
+            }
+            graphics.drawImage(morkopeli, 50, 500, this);
+        }
+
     }
 
     public void paivita() {
-        if (luola != null) {
-        siirrot.setText("Time : " + luola.getAika() + " Boogies: " + luola.getHirvio().size());
+        if (luola != null && game.getOnkoPausePaalla() == false) {
+            siirrot.setText("Time : " + luola.getAika() + " Boogies: " + luola.getHirvio().size());
         }
         System.out.println("paivitettiin");
         repaint();

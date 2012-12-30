@@ -19,26 +19,35 @@ public class Gui extends JFrame {
 
     private JFrame frame;
     private int SivunPituus;
-    private Luola game;
+    private Luola luola;
     private JLabel siirrot;
     private Piirtoalusta piirtoalusta; // "pelikenttä"
+    private boolean onkoPaalla;
+    private Game game;
 
-    public Gui(int SivunPituus, Luola luola) {
+    public Gui(int SivunPituus, Luola luola, Game game) {
         this.SivunPituus = SivunPituus;
-        this.game = luola;
+        this.luola = luola;
+        this.game = game;
+        this.onkoPaalla = false;
     }
 
 //    @Override
-    public void run() {
+    public void run(int kentanKoko) {
         frame = new JFrame("Luolapeli");
-        // game.getKentta().length * 35 + 15, game.getKentta().length * 35 + 77)
-        frame.setPreferredSize(new Dimension(900, 950));
+        // game.getKentta().length * 35 + 17, game.getKentta().length * 35 + 78)
+        Dimension dime = new Dimension(kentanKoko * 35 + 17, kentanKoko * 35 + 78); // 900, 950
+        frame.setPreferredSize(dime);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
         luoKomponentit(frame.getContentPane());
-
+//        dime.setSize(600, 600);
         frame.pack();
         frame.setVisible(true);
+        if (onkoPaalla == false) {
+//            dime.setSize(700, 700);
+            frame.setSize(700, 700);
+            System.out.println("noni menu oli pääl");
+        }
     }
 
     public void luoKomponentit(Container container) {
@@ -48,14 +57,15 @@ public class Gui extends JFrame {
 //        if (game == null) { // luodaan peli
         this.siirrot = new JLabel("Time: - Boogies: - Score: - ");
         container.add(siirrot, BorderLayout.SOUTH);
-        Nappaimistonkuuntelija kuuntelija = new Nappaimistonkuuntelija(game.getPelaaja(), game);
-        frame.addKeyListener(kuuntelija);
 
 //        if (piirtoalusta == null) {
         System.out.println("luotiin piirtoalusta");
-        piirtoalusta = new Piirtoalusta(game, SivunPituus, siirrot);
+        piirtoalusta = new Piirtoalusta(luola, SivunPituus, siirrot, game);
         container.add(piirtoalusta);
         container.add(luoMenubar(), BorderLayout.NORTH);
+
+        Nappaimistonkuuntelija kuuntelija = new Nappaimistonkuuntelija(luola.getPelaaja(), luola, game, piirtoalusta);
+        frame.addKeyListener(kuuntelija);
         if (getPaivitettava() == null) {
             System.out.println("wtf?????????");
 
@@ -93,8 +103,15 @@ public class Gui extends JFrame {
         return mb;
     }
 
+    public void vaihdaKuuntelijaa() {
+    }
+
     public Paivitettava getPaivitettava() {
         return piirtoalusta;
+    }
+
+    public boolean onkoPaalla() {
+        return onkoPaalla;
     }
 
     public JFrame getFrame() {
@@ -102,6 +119,6 @@ public class Gui extends JFrame {
     }
 
     public void setGame(Luola luola) {
-        this.game = luola;
+        this.luola = luola;
     }
 }
