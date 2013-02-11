@@ -10,14 +10,16 @@ public class Nappaimistonkuuntelija extends KeyAdapter {
     private Game game;
     private long pausenAlkuAika;
     private Paivitettava paivitettava;
+    private Gui gui;
     boolean pausePaalla;
 
-    public Nappaimistonkuuntelija(Pelaaja pelaaja, Luola luola, Game game, Paivitettava paivitettava) {
+    public Nappaimistonkuuntelija(Pelaaja pelaaja, Luola luola, Game game, Paivitettava paivitettava, Gui gui) {
         this.pelaaja = pelaaja;
         this.luola = luola;
         this.game = game;
         this.pausePaalla = false;
         this.paivitettava = paivitettava;
+        this.gui = gui;
     }
 
     @Override
@@ -55,6 +57,9 @@ public class Nappaimistonkuuntelija extends KeyAdapter {
                 if (menuValinta == 1) {
                     game.aloitaPeli();
                 }
+                if (menuValinta == 5) {
+                    gui.dispose();
+                }
             }
             if (e.getKeyCode() == KeyEvent.VK_UP) {
                 if (menuValinta == 1) {
@@ -84,6 +89,7 @@ public class Nappaimistonkuuntelija extends KeyAdapter {
                 }
                 paivitettava.paivita();
             }
+            
         }
     }
 }

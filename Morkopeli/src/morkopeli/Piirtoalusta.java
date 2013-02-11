@@ -12,7 +12,9 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
     private Image morko;
     private Image pelaaja;
     private Image tyhja;
-    private Image seina;
+    private Image seina1;
+    private Image seina2;
+    private Image seina3;
     private Image loppu;
     private Image pause;
     private Image rip;
@@ -21,6 +23,8 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
     private Image menu3;
     private Image menu4;
     private Image menu5;
+    private Image door;
+    private Image mamelukkikala;
     private Image morkopeli;
     private JLabel siirrot;
     private Game game;
@@ -42,8 +46,8 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
         this.pelaaja = Toolkit.getDefaultToolkit().getImage(url2);
         URL url3 = Gui.class.getResource("tyhja.png");
         this.tyhja = Toolkit.getDefaultToolkit().getImage(url3);
-        URL url4 = Gui.class.getResource("seina.png");
-        this.seina = Toolkit.getDefaultToolkit().getImage(url4);
+        URL url4 = Gui.class.getResource("morkopeli.png");
+        this.morkopeli = Toolkit.getDefaultToolkit().getImage(url4);
         URL url5 = Gui.class.getResource("end.png");
         this.loppu = Toolkit.getDefaultToolkit().getImage(url5);
         URL url6 = Gui.class.getResource("pause.png");
@@ -60,8 +64,38 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
         this.menu4 = Toolkit.getDefaultToolkit().getImage(url11);
         URL url12 = Gui.class.getResource("menu5.png");
         this.menu5 = Toolkit.getDefaultToolkit().getImage(url12);
-        URL url13 = Gui.class.getResource("morkopeli.png");
-        this.morkopeli = Toolkit.getDefaultToolkit().getImage(url13);
+        URL url13 = Gui.class.getResource("door.png");
+        this.door = Toolkit.getDefaultToolkit().getImage(url13);
+        URL url14 = Gui.class.getResource("mamelukkikala.png");
+        this.mamelukkikala = Toolkit.getDefaultToolkit().getImage(url14);
+        // Seinät
+        haeSeinat();
+    }
+
+    private void haeSeinat() {
+        // Arvotaan 3 eri seinäsettiä:
+        int s1 = (int) Math.floor((Math.random() * 12));
+        int s2 = (int) Math.floor((Math.random() * 12));
+        int s3 = (int) Math.floor((Math.random() * 12));
+        while (true) {
+            if (s1 != s2 && s2 != s3 && s1 != s3) {
+                break;
+            } else {
+                s1 = (int) Math.floor((Math.random() * 12));
+                s2 = (int) Math.floor((Math.random() * 12));
+                s3 = (int) Math.floor((Math.random() * 12));
+            }
+        }
+        String taulu[] = new String[]{"seina1.png", "seina2.png", "seina3.png",
+            "seina4.png", "seina5.png", "seina6.png", "seina7.png", "seina8.png",
+            "seina9.png", "seina10.png", "seina11.png", "seina12.png"};
+
+        URL url30 = Gui.class.getResource(taulu[s1]);
+        this.seina1 = Toolkit.getDefaultToolkit().getImage(url30);
+        URL url31 = Gui.class.getResource(taulu[s2]);
+        this.seina2 = Toolkit.getDefaultToolkit().getImage(url31);
+        URL url32 = Gui.class.getResource(taulu[s3]);
+        this.seina3 = Toolkit.getDefaultToolkit().getImage(url32);
     }
 
     @Override
@@ -98,13 +132,30 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
                         }
                     }
                     if (taulu[i][j].equals("S")) {
-                        graphics.drawImage(seina, j * palaP, i * palaP, palaP, palaP, this);
+                        if (game.getPeliTilanne()[0] == 1) {
+                            graphics.drawImage(seina1, j * palaP, i * palaP, palaP, palaP, this);
+                        }
+                        if (game.getPeliTilanne()[0] == 2) {
+                            graphics.drawImage(seina2, j * palaP, i * palaP, palaP, palaP, this);
+                        }
+                        if (game.getPeliTilanne()[0] == 3) {
+                            graphics.drawImage(seina3, j * palaP, i * palaP, palaP, palaP, this);
+                        }
                     }
                     if (taulu[i][j].equals("E")) {
                         graphics.drawImage(loppu, j * palaP, i * palaP, palaP, palaP, this);
                     }
+                    if (taulu[i][j].equals("D")) {
+                        graphics.drawImage(door, j * palaP, i * palaP, palaP, palaP, this);
+                    }
                 }
             }
+            if (luola.getMamelukkikala() != null) {
+                graphics.drawImage(mamelukkikala, luola.getMamelukkikala().getX() * palaP - (105 / 3), luola.getMamelukkikala().getY() * palaP - (105 / 3), palaP * 3, palaP * 3, this);
+                System.out.println("MAMELUKKIKALAN X KOORDINAATTI " + luola.getMamelukkikala().getX());
+                System.out.println("MAMELUKKIKALAN X KOORDINAATTI " + luola.getMamelukkikala().getY());
+            }
+
         }
         // Jos ollaan menussa
         if (!game.getOnkoPeliPaalla()) {
@@ -125,8 +176,10 @@ public class Piirtoalusta extends JPanel implements Paivitettava {
     }
 
     public void paivita() {
-        if (luola != null && game.getOnkoPausePaalla() == false) {
-            siirrot.setText("Time : " + luola.getAika() + " Boogies: " + luola.getHirvio().size());
+        // Pelin alalaidassa oleva teksti:
+        if (luola != null && game.getOnkoPausePaalla() == false && game.getOnkoPeliPaalla() == true) {
+            siirrot.setText("Level: " + game.getPeliTilanne()[0] + " Time : " + luola.getAika()
+                    + " Boogies: " + luola.getHirvio().size());
         }
         System.out.println("paivitettiin");
         repaint();

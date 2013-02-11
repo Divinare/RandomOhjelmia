@@ -35,16 +35,12 @@ public class Gui extends JFrame {
 //    @Override
     public void run(int kentanKoko) {
         frame = new JFrame("Luolapeli");
-        // game.getKentta().length * 35 + 17, game.getKentta().length * 35 + 78)
-        Dimension dime = new Dimension(kentanKoko * 35 + 17, kentanKoko * 35 + 78); // 900, 950
-        frame.setPreferredSize(dime);
+        frame.setPreferredSize(new Dimension(700, 700));
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         luoKomponentit(frame.getContentPane());
-//        dime.setSize(600, 600);
         frame.pack();
         frame.setVisible(true);
         if (onkoPaalla == false) {
-//            dime.setSize(700, 700);
             frame.setSize(700, 700);
             System.out.println("noni menu oli pääl");
         }
@@ -54,21 +50,18 @@ public class Gui extends JFrame {
         BorderLayout layout = new BorderLayout();
         container.setLayout(layout);
 
-//        if (game == null) { // luodaan peli
-        this.siirrot = new JLabel("Time: - Boogies: - Score: - ");
+        this.siirrot = new JLabel("Level: - Time: - Boogies: - Score: - ");
         container.add(siirrot, BorderLayout.SOUTH);
 
-//        if (piirtoalusta == null) {
         System.out.println("luotiin piirtoalusta");
         piirtoalusta = new Piirtoalusta(luola, SivunPituus, siirrot, game);
         container.add(piirtoalusta);
         container.add(luoMenubar(), BorderLayout.NORTH);
 
-        Nappaimistonkuuntelija kuuntelija = new Nappaimistonkuuntelija(luola.getPelaaja(), luola, game, piirtoalusta);
+        Nappaimistonkuuntelija kuuntelija = new Nappaimistonkuuntelija(luola.getPelaaja(), luola, game, piirtoalusta, this);
         frame.addKeyListener(kuuntelija);
         if (getPaivitettava() == null) {
             System.out.println("wtf?????????");
-
         }
     }
 
@@ -103,9 +96,6 @@ public class Gui extends JFrame {
         return mb;
     }
 
-    public void vaihdaKuuntelijaa() {
-    }
-
     public Paivitettava getPaivitettava() {
         return piirtoalusta;
     }
@@ -120,5 +110,11 @@ public class Gui extends JFrame {
 
     public void setGame(Luola luola) {
         this.luola = luola;
+    }
+    
+    public void muutaIkkunanKokoa(int kentanKoko) {
+        System.out.println("muutetaan kokoa " + (kentanKoko * 35 + 17));
+        System.out.println("muutetaan kokoa " + (kentanKoko * 35 + 78));
+        frame.setSize((kentanKoko * 35 + 17), (kentanKoko * 35 + 78));
     }
 }

@@ -48,6 +48,10 @@ public class Soittaja {
         this.aani.stop();
     }
     
+    public void laitaAanetPaalleTaiPoisPaalta() {
+        aanetPaalla = !aanetPaalla;
+    }
+    
     public boolean soitetaankoTallaHetkellaMitaan(){
         return this.aani.isRunning();
     }

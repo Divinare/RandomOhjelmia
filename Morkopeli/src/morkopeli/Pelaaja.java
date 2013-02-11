@@ -63,4 +63,12 @@ public class Pelaaja {
     public void setY(int y) {
         this.y = y;
     }
+
+    public void setPelaajanKentanKorkeus(int k) {
+        this.korkeus = k;
+    }
+
+    public void setPelaajanKentanLeveys(int l) {
+        this.leveys = l;
+    }
 }

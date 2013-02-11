@@ -10,94 +10,105 @@ import javax.swing.Timer;
 
 public class Luola extends Timer implements ActionListener {
 
-    private int leveys, korkeus, morkoM, pisteet, taso;
-    private long alkuaika, pauseihinKulunutAika, aikaFailAantaVarten;
+    private int pisteet, taso, biisi, ovenKorkeus, ovenLeveys;
+    private long alkuaika, pauseihinKulunutAika;
+    private long morkoSpawnAlkuAika, mamelukkiSpawnAika, mamelukkiLiikkumaAika;
     private ArrayList<Hirvio> hirviot;
     private Pelaaja pelaaja;
-    private boolean jatkuu, voitit, paused, havitty;
+    private boolean jatkuu, paused, havitty, tasoValmis, voidaankoLiikkua;
     private String[][] kentta;
+    private Kentat tasot;
     private Tekstinlukija lukija;
     public Paivitettava paivitettava;
     private Soittaja musiikinSoittaja;
     private String[] randomMusic;
+    private Game game;
+    private Mamelukkikala mamelukkikala;
 
-    public Luola(int morkoM, Soittaja musiikinSoittaja, String[] randomMusic) {
+    public Luola(int morkoM, Soittaja musiikinSoittaja, String[] randomMusic, Game game) {
         super(1000, null);
-        this.morkoM = morkoM;
         this.musiikinSoittaja = musiikinSoittaja;
         this.randomMusic = randomMusic;
+        this.game = game;
         this.pisteet = 0;
-        voitit = false;
         this.jatkuu = true;
-        this.havitty = false; // älkää välittäkö tästä
+        this.havitty = false;
         this.pauseihinKulunutAika = 0;
         hirviot = new ArrayList<>();
         paused = false;
         this.lukija = new Tekstinlukija();
-        Kentat tasot = new Kentat();
+        this.tasot = new Kentat();
         this.kentta = tasot.taso1;
         this.taso = 1;
-//        lueKentta();
-        this.leveys = kentta.length;
-        this.korkeus = kentta[0].length;
-        pelaaja = new Pelaaja(Suunta.ALAS, leveys, korkeus, this);
-        alustaKentta(morkoM);
+        this.biisi = 1;
+        this.voidaankoLiikkua = true;
+        pelaaja = new Pelaaja(Suunta.ALAS, getLeveys(), getKorkeus(), this);
+        alustaKentta(morkoM); // morko M montako mörköä per "M"
         addActionListener(this);
         setInitialDelay(2000);
     }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-      //  System.out.println();
+        System.out.println("MORKOSPAWN " + ((System.currentTimeMillis() - morkoSpawnAlkuAika) / 1000));
         if (!jatkuu) {
-            System.out.println("hävisit hähää!");
-            if (havitty == false) {
-                havitty = true;
-                musiikinSoittaja.stop();
-                musiikinSoittaja.play("aww");
-                this.aikaFailAantaVarten = System.currentTimeMillis();
-            }
-            System.out.println("" + ((System.currentTimeMillis() - aikaFailAantaVarten)));
-            if ((System.currentTimeMillis() - aikaFailAantaVarten) > 1000) {
-                if (!musiikinSoittaja.soitetaankoTallaHetkellaMitaan()) {
-                    musiikinSoittaja.play("aaa");
-                }
-            }
+            peliHavitty();
             return;
         }
-
+        if (tasoValmis == false) {
+            checkTasonVaihtuminen();
+        }
         if (!musiikinSoittaja.soitetaankoTallaHetkellaMitaan()) {
-            musiikinSoittaja.play(randomMusic[2]);
+            biisi++;
+            if (biisi > randomMusic.length - 1) { // Jos playlist loppuu
+                biisi = 0;
+                game.sekoitaPlaylist();
+            }
+            musiikinSoittaja.play(randomMusic[biisi]);
         }
         if (paused) {
             piirra();
             return;
         }
-        liiku();
+        if (voidaankoLiikkua == true) {
+            liiku();
+            checkSynnytaMorko();
+        }
+        checkMamelukkikala();
+        if (tasoValmis == true) {
+            checkOnkoTasoLapi();
+        }
         if (onkoMorkoSamassaPaikassa(pelaaja.getX(), pelaaja.getY())) {
             havio();
             piirra();
             return;
         }
-        for (int i = 0; i < hirviot.size(); i++) {
-            hirviot.get(i).liiku(korkeus, leveys);
+        if (voidaankoLiikkua == true) {
+            for (int i = 0; i < hirviot.size(); i++) {
+                hirviot.get(i).liiku(getKorkeus(), getLeveys());
+            }
         }
         if (onkoMorkoSamassaPaikassa(pelaaja.getX(), pelaaja.getY())) {
             havio();
             piirra();
             return;
         }
+        if (onkoMamelukkikalaLahella(pelaaja.getX(), pelaaja.getY())) {
+            havio();
+            piirra();
+            return;
+        }
+
         piirra();
         if (taso == 1) {
             setDelay(800 - (getAika() * 5));
             System.out.println(500 - (getAika() * 5));
         }
-//        if (1000 - (1 + getAika()) * 50 <= 101) {
-//            setDelay(80);
-//        } else {
-//            setDelay(1000 - ((1 + getAika()) * 50));
+//        if (taso == 2 && getMamelukkikala() != null) {
+//            setDelay(getDelay() / 2);
 //        }
     }
+    // Custom gamea varten
 
     private void lueKentta() {
         try {
@@ -115,15 +126,19 @@ public class Luola extends Timer implements ActionListener {
     }
 
     private void alustaKentta(int maara) {
-        System.out.println("KORK " + korkeus);
-        System.out.println("LEVE " + leveys);
-        for (int i = 0; i < korkeus; i++) {
-            for (int j = 0; j < leveys; j++) {
+        System.out.println("KORK " + getKorkeus());
+        System.out.println("LEVE " + getLeveys());
+//        this.leveys = kentta.length;
+//        this.korkeus = kentta[0].length;
+        randomaaPaikkaEiReunoille("D"); // Laitetaan kenttään ovi
+        for (int i = 0; i < getKorkeus(); i++) {
+            for (int j = 0; j < getLeveys(); j++) {
                 if ("M".equalsIgnoreCase(kentta[i][j])) {
                     int lisatty = 0;
                     while (lisatty < maara) {
                         Hirvio hirvio = new Hirvio(j, i, this);
                         hirviot.add(hirvio);
+                        System.out.println("laitettiin hirviö " + j + " " + i);
                         lisatty++;
                     }
                 }
@@ -133,6 +148,26 @@ public class Luola extends Timer implements ActionListener {
                 }
             }
         }
+    }
+
+    public void peliHavitty() {
+        if (getMamelukkikala() != null && havitty == false) {
+            musiikinSoittaja.stop();
+            musiikinSoittaja.play("mamelukkikalaend");
+            havitty = true;
+        }
+        int luku = (int) Math.floor((Math.random() * 2) + 1); // randomaa 1 tai 2
+        if (luku == 1 && havitty == false) {
+            musiikinSoittaja.stop();
+            musiikinSoittaja.play("aww");
+            havitty = true;
+        }
+        if (luku == 2 && havitty == false) {
+            musiikinSoittaja.stop();
+            musiikinSoittaja.play("aaa");
+            havitty = true;
+        }
+        System.out.println("hävisit hähää!");
     }
 
     public void liiku() {
@@ -164,11 +199,7 @@ public class Luola extends Timer implements ActionListener {
     }
 
     public void pause() {
-        if (paused) {
-            paused = false;
-        } else {
-            paused = true;
-        }
+        paused = !paused;
     }
 
     public boolean getPause() {
@@ -181,6 +212,10 @@ public class Luola extends Timer implements ActionListener {
 
     public void asetaAlkuAika(long maara) {
         this.alkuaika = maara;
+    }
+
+    public void asetaMamelukkiSpawnAika(long maara) {
+        this.mamelukkiSpawnAika = maara;
     }
 
     public void setPaivitettava(Paivitettava paivitettava) {
@@ -200,12 +235,51 @@ public class Luola extends Timer implements ActionListener {
         return onko;
     }
 
+    public boolean onkoMamelukkikalaSamassaPaikassa(int xkoord, int ykoord) {
+        boolean onko = false;
+        if (mamelukkikala == null) {
+            return false;
+        }
+        if (xkoord == mamelukkikala.getX() && ykoord == mamelukkikala.getY()) {
+            onko = true;
+        }
+        return onko;
+    }
+
+    public boolean onkoMamelukkikalaLahella(int xkoord, int ykoord) {
+        boolean onko = false;
+        if (mamelukkikala == null) {
+            return false;
+        }
+        int x = mamelukkikala.getX();
+        int y = mamelukkikala.getY();
+        if (x - 1 == xkoord && y == ykoord) {
+            return true;
+        }
+        if (x == xkoord && y == ykoord) {
+            return true;
+        }
+        if (x + 1 == xkoord && y == ykoord) {
+            return true;
+        }
+        if (x == xkoord && y - 1 == ykoord) {
+            return true;
+        }
+        if (x == xkoord && y == ykoord) {
+            return true;
+        }
+        if (x == xkoord && y + 1 == ykoord) {
+            return true;
+        }
+        return onko;
+    }
+
     public int getKorkeus() {
-        return korkeus;
+        return kentta[0].length;
     }
 
     public int getLeveys() {
-        return leveys;
+        return kentta.length;
     }
 
     public boolean onkoPelaajaSamassaPaikassa(int xkoord, int ykoord) {
@@ -221,11 +295,13 @@ public class Luola extends Timer implements ActionListener {
     // X = Morko, O = tyhja, P = pelaaja, S = seinä, E = end
 
     public String[][] getKentta() {
-        for (int i = 0; i < leveys; i++) {
-            for (int j = 0; j < korkeus; j++) {
-                if (!kentta[i][j].equals("S") && !kentta[i][j].equals("E")) {
+        for (int i = 0; i < getLeveys(); i++) {
+            for (int j = 0; j < getKorkeus(); j++) {
+                if (!kentta[i][j].equals("S") && !kentta[i][j].equals("E") && !kentta[i][j].contains("D")) {
                     if (onkoMorkoSamassaPaikassa(j, i)) {
                         kentta[i][j] = "M";
+                    } else if (onkoMamelukkikalaSamassaPaikassa(j, i)) {
+                        kentta[i][j] = "mamelukkikala";
                     } else {
                         kentta[i][j] = "O";
                     }
@@ -236,7 +312,208 @@ public class Luola extends Timer implements ActionListener {
         return kentta;
     }
 
+    public void kasvataTasoa() {
+        this.hirviot.clear();
+        taso++;
+        if (taso == 2) {
+            this.kentta = this.tasot.taso2;
+        }
+        if (taso == 3) {
+            this.kentta = this.tasot.taso3;
+        }
+        alustaKentta(2);
+        pelaaja.setPelaajanKentanKorkeus(getKorkeus());
+        pelaaja.setPelaajanKentanLeveys(getLeveys());
+    }
+
+    private void checkTasonVaihtuminen() {
+        if (taso == 1) {
+            if (getAika() > 5) {
+                this.tasoValmis = true;
+                randomaaPaikka("E");
+            }
+        }
+        if (taso == 2) {
+            if (getAika() > 5) {
+                this.tasoValmis = true;
+                randomaaPaikka("E");
+            }
+        }
+        if (taso == 3) {
+            if (getAika() > 5) {
+                this.tasoValmis = true;
+                randomaaPaikka("E");
+            }
+        }
+    }
+
+    private void checkOnkoTasoLapi() {
+        if (kentta[pelaaja.getY()][pelaaja.getX()].equals("E")) {
+            System.out.println("siirrytään seuraavaan tasoon!");
+            tasoValmis = false;
+            game.siirrySeuraavaanTasoon();
+        }
+    }
+
+    // Etsitään seinä S, jonka vieressä on tyhjää eli O
+    private void randomaaPaikka(String kirjain) {
+        System.out.println("randomataan " + kirjain);
+        while (true) {
+            int k = (int) Math.floor((Math.random() * getKorkeus()));
+            int l = (int) Math.floor((Math.random() * getLeveys()));
+            if (kentta[k][l].equals("S")) {
+                if (l - 1 >= 0) {
+                    if (kentta[k][l - 1].equals("O")) {
+                        kentta[k][l] = kirjain;
+                        break;
+                    }
+                }
+                if (l + 1 < getLeveys()) {
+                    if (kentta[k][l + 1].equals("O")) {
+                        kentta[k][l] = kirjain;
+                        break;
+                    }
+                }
+                if (k - 1 >= 0) {
+                    if (kentta[k - 1][l].equals("O")) {
+                        kentta[k][l] = kirjain;
+                        break;
+                    }
+                }
+                if (k + 1 < getKorkeus()) {
+                    if (kentta[k + 1][l].equals("O")) {
+                        kentta[k][l] = kirjain;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void randomaaPaikkaEiReunoille(String kirjain) {
+        System.out.println("randomataan " + kirjain);
+        while (true) {
+            int k = (int) Math.floor((Math.random() * getKorkeus()));
+            int l = (int) Math.floor((Math.random() * getLeveys()));
+            if (kirjain.equals("D")) {
+                this.ovenKorkeus = k;
+                this.ovenLeveys = l;
+            }
+            if (kentta[k][l].equals("S")) {
+                if (l - 1 >= 0) {
+                    if (kentta[k][l - 1].equals("O") && l + 1 < getLeveys()) {
+                        kentta[k][l] = kirjain;
+                        break;
+                    }
+                }
+                if (l + 1 < getLeveys()) {
+                    if (kentta[k][l + 1].equals("O") && l - 1 >= 0) {
+                        kentta[k][l] = kirjain;
+                        break;
+                    }
+                }
+                if (k - 1 >= 0) {
+                    if (kentta[k - 1][l].equals("O") && k + 1 < getKorkeus()) {
+                        kentta[k][l] = kirjain;
+                        break;
+                    }
+                }
+                if (k + 1 < getKorkeus()) {
+                    if (kentta[k + 1][l].equals("O") && k - 1 >= 0) {
+                        kentta[k][l] = kirjain;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void checkSynnytaMorko() {
+        int aika = 100;
+        if (taso == 1) {
+            aika = 15;
+        }
+        if (taso == 2) {
+            aika = 10;
+        }
+        if (taso == 3) {
+            aika = 5;
+        }
+        // "Jos on kulunut se väli millä mörköjä halutaan spawnata"
+        if (((System.currentTimeMillis() / 1000) - aika) > (morkoSpawnAlkuAika / 1000)) {
+            synnytaMorko();
+            morkoSpawnAlkuAika = System.currentTimeMillis();
+        }
+    }
+
+    private void synnytaMorko() {
+        Hirvio hirvio = new Hirvio(ovenLeveys, ovenKorkeus, this);
+        hirviot.add(hirvio);
+    }
+
+    private void checkMamelukkikala() {
+        if (getMamelukkikala() == null) {
+            if (taso == 2) {
+                System.out.println("tarkistetaan mamelukkikala");
+                if (((System.currentTimeMillis() / 1000) - 5) > (mamelukkiSpawnAika / 1000)) {
+                    System.out.println("laitetaan mamelukkikala");
+                    laitaMamelukkikala();
+                    musiikinSoittaja.stop();
+                    musiikinSoittaja.play("mamelukkikala");
+                    this.mamelukkiLiikkumaAika = System.currentTimeMillis();
+                    setDelay(getDelay() / 2);
+                }
+            }
+        } else {
+            if (((System.currentTimeMillis() / 1000) - 30) > (mamelukkiLiikkumaAika / 1000)) {
+                voidaankoLiikkua = !voidaankoLiikkua; // Jotta mamelukkikalasta tulisi 2x pelaajaa nopeampi
+                mamelukkikala.liiku(getKorkeus(), getLeveys());
+            }
+        }
+    }
+
+    private void laitaMamelukkikala() {
+        System.out.println("randomataan mamelukkikalan sijainti");
+        while (true) {
+            int k = (int) Math.floor((Math.random() * getKorkeus()));
+            int l = (int) Math.floor((Math.random() * getLeveys()));
+//            if (kirjain.equals("D")) {
+//                this.ovenKorkeus = k;
+//                this.ovenLeveys = l;
+//            }
+            if (kentta[k][l].equals("O")) {
+                if (l + 10 < pelaaja.getX()) {
+                    this.mamelukkikala = new Mamelukkikala(l, k, this);
+                    break;
+                }
+
+                if (l - 10 > pelaaja.getX()) {
+                    this.mamelukkikala = new Mamelukkikala(l, k, this);
+                    break;
+                }
+
+                if (k + 10 < pelaaja.getY()) {
+                    this.mamelukkikala = new Mamelukkikala(l, k, this);
+                    break;
+                }
+
+                if (k - 10 < pelaaja.getY()) {
+                    this.mamelukkikala = new Mamelukkikala(l, k, this);
+                    break;
+                }
+            }
+        }
+    }
+
+    public Mamelukkikala getMamelukkikala() {
+        return mamelukkikala;
+    }
+
     public ArrayList<Hirvio> getHirvio() {
         return hirviot;
+    }
+
+    public void asetaMorkoSpawnAlkuAika() {
+        this.morkoSpawnAlkuAika = System.currentTimeMillis();
     }
 }
