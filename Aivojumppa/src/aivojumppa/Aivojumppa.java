@@ -2,6 +2,9 @@ package aivojumppa;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -17,8 +20,15 @@ public class Aivojumppa {
     private int minimi;
     private int maksimi;
 
-    public Aivojumppa() {
-        this.tiedosto = new File("src/sanalista.txt");
+    public Aivojumppa() throws URISyntaxException {
+//        URL path = ClassLoader.getSystemResource("sanalista.txt");
+//        if (path == null) {
+//            System.out.println("ei löytynyt sanalistaaa :((");
+//            //The file was not found, insert error handling here
+//        }
+//        this.tiedosto = new File(path.toURI());
+        this.tiedosto  = new File("./build/classes/sanalista.txt");
+//        this.tiedosto = new File("sanalista.txt");
         this.lukija1 = new Scanner(System.in);
         this.kirjaimet = new ArrayList();
         this.eiToivotutKirjaimet = new ArrayList();
@@ -122,5 +132,10 @@ public class Aivojumppa {
         this.minimi = Integer.parseInt(lukija1.nextLine());
         System.out.println("Anna sanan maksimipituus: ");
         this.maksimi = Integer.parseInt(lukija1.nextLine());
+    }
+
+    public static void main(String[] args) throws FileNotFoundException, URISyntaxException {
+        Aivojumppa peli = new Aivojumppa();
+        peli.aloita();
     }
 }
